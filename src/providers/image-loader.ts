@@ -289,16 +289,14 @@ export class ImageLoader {
         }).subscribe(
           (data: Blob) => {
             this.file.writeFile(localDir, fileName, data, {replace: true}).then((file: FileEntry) => {
-              if (this.shouldIndex) {
-                this.addFileToIndex(file).then(() => {
-                  this.getCachedImagePath(currentItem.imageUrl).then((localUrl) => {
-                    currentItem.resolve(localUrl);
-                    resolve();
-                    done();
-                    this.maintainCacheSize();
-                  });
+              this.addFileToIndex(file).then(() => {
+                this.getCachedImagePath(currentItem.imageUrl).then((localUrl) => {
+                  currentItem.resolve(localUrl);
+                  resolve();
+                  done();
+                  this.maintainCacheSize();
                 });
-              }
+              });
             }).catch((e) => {
               //Could not write image
               error(e);
