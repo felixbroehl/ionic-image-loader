@@ -68,6 +68,10 @@ export class ImageLoader {
   private get shouldIndex(): boolean {
     return (this.config.maxCacheAge > -1) || (this.config.maxCacheSize > -1);
   }
+  
+  private get isCacheSizeExceeded(): boolean {
+    return this.config.maxCacheSize > -1 && this.currentCacheSize > this.config.maxCacheSize;
+  }
 
   private get isWKWebView(): boolean {
     return this.platform.is('ios') && (<any>window).webkit && (<any>window).webkit.messageHandlers;
@@ -289,6 +293,9 @@ export class ImageLoader {
         }).subscribe(
           (data: Blob) => {
             this.file.writeFile(localDir, fileName, data, {replace: true}).then((file: FileEntry) => {
+              if (this.isCacheSizeExceeded) {
+                  this.maintainCacheSize();
+              }
               this.addFileToIndex(file).then(() => {
                 this.getCachedImagePath(currentItem.imageUrl).then((localUrl) => {
                   currentItem.resolve(localUrl);
